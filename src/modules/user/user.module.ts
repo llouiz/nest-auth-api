@@ -8,5 +8,5 @@ import { CacheModule } from '../cache/cache.module';
   imports: [CacheModule], 
   controllers: [UserController],
   providers: [UserService, PrismaService],
-})
+  })
 export class UserModule {}
