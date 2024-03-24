@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
+import {sign} from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -31,7 +32,15 @@ export class UserService {
     });
   }
 
-  async login(email: string, password: string): Promise<User | null> {
+  async getUserByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+  }
+
+  async login(email: string, password: string): Promise<any | null> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: email,
@@ -48,8 +57,19 @@ export class UserService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
     delete user.password;
-    
-    return user;
+    const token = sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      },
+      jwtSecret,
+      { expiresIn: 6 * 60 * 60 }
+    )
+    return {
+      token:  token as string
+    };
   }
 }
