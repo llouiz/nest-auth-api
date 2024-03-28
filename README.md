@@ -4,6 +4,10 @@
 $ yarn install
 ```
 
+```bash
+$ yarn prisma generate
+```
+
 ## Running the app
 
 ```bash
