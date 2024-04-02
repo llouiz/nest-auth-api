@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
-import {sign} from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -11,13 +11,15 @@ export class UserService {
   async createUser(createUserDto: Prisma.UserCreateInput): Promise<User> {
     const saltOrRounds = 10;
     const passwordHash = await hash(createUserDto.password, saltOrRounds);
-
-    return this.prisma.user.create({
+    await this.prisma.user.create({
       data: {
         ...createUserDto,
         password: passwordHash,
       },
     });
+    
+    const userLogin = await this.login(createUserDto.email, createUserDto.password);
+    return userLogin;
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -63,13 +65,13 @@ export class UserService {
       {
         id: user.id,
         email: user.email,
-        username: user.username
+        username: user.username,
       },
       jwtSecret,
-      { expiresIn: 6 * 60 * 60 }
-    )
+      { expiresIn: 6 * 60 * 60 },
+    );
     return {
-      token:  token as string
+      token: token as string,
     };
   }
 }

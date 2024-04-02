@@ -18,7 +18,7 @@ export class UserController {
   @Post()
   @ApiResponse({ type: ResponseCreateUserDTO, description: 'user' })
   @ApiBody({ type: CreateUserDTO })
-  async createUser(@Body() createUser: UserModel): Promise<UserModel> {
+  async createUser(@Body() createUser: UserModel): Promise<UserModel | null> {
     return this.userService.createUser(createUser);
   }
 
